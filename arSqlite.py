@@ -26,13 +26,9 @@ class Db:
         return lista
     
     def novaTabela(self, nomeTabela, atributosTabela):
-        
         cursor = self.connect().cursor()
-
         cursor.execute(f"""
-        CREATE TABLE {nomeTabela} {str(atributosTabela).replace("'", "")};
-        """)
-
+        CREATE TABLE {nomeTabela} {str(atributosTabela).replace("'", "")};""")
         self.disconnect()
     
     #Adicionar, editar e deletar
@@ -70,6 +66,5 @@ class Db:
         
     
 if __name__ == '__main__':
-    db1 = Db('C:\Arquivos\Arquivos Sincronizados\Meus arquivos\z_Outros\ESTUDOS\Programação\PROJETOS\Python\Cont\CONT\cont V2.0\db\db.db')
-    print(db1.getInstancia('sociode', ['id', '#17132']))
+    pass
         

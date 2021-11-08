@@ -1,2 +1,2 @@
 # arSqlite
-Biblioteca para utilização de Sqlite em Python.
+Biblioteca para simplifição de Sqlite em Python.

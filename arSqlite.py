@@ -1,7 +1,7 @@
 from sqlite3 import connect
 
 class Db:
-    def __init__(self, local=None):
+    def __init__(self, local:str=None):
         self.local = local
     
     def connect(self):
@@ -11,58 +11,62 @@ class Db:
     def disconnect(self):
         self.conn.close()
     
-    def getTabela(self, tabela):
+    def get_table(self, tabela:str):
         cursor = self.connect().cursor()
         cursor.execute(f"""SELECT * FROM {tabela};""")
         list_to_return = cursor.fetchall()
         self.disconnect()
         return list_to_return
     
-    def getInstancia(self, tabela, key):
+    def get_table_columns(self, table:str):
         cursor = self.connect().cursor()
-        cursor.execute(f"""SELECT * FROM {tabela} WHERE {key[0]} = '{key[1]}'""")
+        cursor.execute(f"""PRAGMA table_info({table});""")
+        lista = cursor.fetchall()
+        self.disconnect()
+        return tuple([i[1] for i in lista])
+    
+    def get_instance(self, table:str, key:list):
+        cursor = self.connect().cursor()
+        cursor.execute(f"""SELECT * FROM {table} WHERE {key[0]} = '{key[1]}'""")
         lista = cursor.fetchall()
         self.disconnect()
         return lista
     
-    def novaTabela(self, nomeTabela, atributosTabela):
+    def new_table(self, table_name:str, table_columns:str):
         cursor = self.connect().cursor()
         cursor.execute(f"""
-        CREATE TABLE {nomeTabela} {str(atributosTabela).replace("'", "")};""")
+        CREATE TABLE {table_name} {str(table_columns).replace("'", "")};""")
         self.disconnect()
     
-    #Adicionar, editar e deletar
-    def novaInstancia(self, tabela, mapa, tupla):
+    #New, edit e del
+    def new_instance(self, table:str, tupla:tuple):
         conn = self.connect()
         cursor = conn.cursor()
-        # inserindo dados na tabela
+        mapa = self.get_table_columns(table)
         cursor.execute(f"""
-        INSERT INTO {tabela} {tuple(i.replace("'", "") for i in mapa)} VALUES {tuple(tupla)}
+        INSERT INTO {table} {tuple(i.replace("'", "") for i in mapa)} VALUES {tuple(tupla)}
         """)
         conn.commit()
         self.disconnect()
-        return f'{tabela} adicionada com sucesso!'
     
-    def editarInstancia(self, tabela, id, atributo, valor):
+    def edit_instance(self, table:str, key:list, attribute:str, value):
         conn = self.connect()
         cursor = conn.cursor()
         cursor.execute(f"""
-                            UPDATE {tabela}
-                            SET {atributo} = '{valor}'
-                            WHERE id = '{id}'
+                            UPDATE {table}
+                            SET {attribute} = '{value}'
+                            WHERE {key[0]} = '{key[1]}'
                             """, ())
         conn.commit()
-        return "Dados atualizados com sucesso."
     
-    def delInstancia(self, tabela, key):
+    def del_instance(self, table:str, key:list):
         conn = self.connect()
         cursor = conn.cursor()
         key =  f"WHERE {key[0]} = '{key[1]}'"
         cursor.execute(f"""
-                        DELETE FROM {tabela} {key}
+                        DELETE FROM {table} {key}
                         """,)
         conn.commit()
-        return "Dados deletados com sucesso."
         
     
 if __name__ == '__main__':

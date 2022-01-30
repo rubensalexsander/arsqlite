@@ -11,6 +11,13 @@ class Db:
     def disconnect(self):
         self.conn.close()
     
+    def get_tables(self):
+        cursor = self.connect().cursor()
+        cursor.execute(f"""SELECT * FROM sqlite_master WHERE type='table';""")
+        list_to_return = [i[1] for i in cursor.fetchall()]
+        self.disconnect()
+        return list_to_return
+    
     def get_table(self, tabela:str):
         cursor = self.connect().cursor()
         cursor.execute(f"""SELECT * FROM {tabela};""")
@@ -67,8 +74,6 @@ class Db:
                         DELETE FROM {table} {key}
                         """,)
         conn.commit()
-        
     
 if __name__ == '__main__':
     pass
-        

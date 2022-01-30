@@ -18,9 +18,9 @@ class Db:
         self.disconnect()
         return list_to_return
     
-    def get_table(self, tabela:str):
+    def get_table(self, tabela:str, columns:tuple='*'):
         cursor = self.connect().cursor()
-        cursor.execute(f"""SELECT * FROM {tabela};""")
+        cursor.execute(f"""SELECT {str(columns).replace("'", "")} FROM {tabela};""")
         list_to_return = cursor.fetchall()
         self.disconnect()
         return list_to_return
@@ -39,7 +39,7 @@ class Db:
         self.disconnect()
         return lista
     
-    def new_table(self, table_name:str, table_columns:str):
+    def new_table(self, table_name:str, table_columns:tuple):
         cursor = self.connect().cursor()
         cursor.execute(f"""
         CREATE TABLE {table_name} {str(table_columns).replace("'", "")};""")

@@ -1,6 +1,6 @@
 from sqlite3 import connect
 
-class Db:
+class DbSqlite:
     def __init__(self, local:str=None):
         self.local = local
     
@@ -25,16 +25,18 @@ class Db:
         self.disconnect()
         return list_to_return
     
+    #Retorna lista de colunas de uma tabela.
     def get_table_columns(self, table:str):
         cursor = self.connect().cursor()
         cursor.execute(f"""PRAGMA table_info({table});""")
         lista = cursor.fetchall()
         self.disconnect()
-        return tuple([i[1] for i in lista])
+        return (i[1] for i in lista)
     
-    def get_instance(self, table:str, key:list):
+    #Retorna instância de uma tabela. (key -> [atributo, valor])
+    def get_instance(self, table:str, key:list, columns:tuple='*'):
         cursor = self.connect().cursor()
-        cursor.execute(f"""SELECT * FROM {table} WHERE {key[0]} = '{key[1]}'""")
+        cursor.execute(f"""SELECT {columns} FROM {table} WHERE {key[0]} = '{key[1]}'""")
         lista = cursor.fetchall()
         self.disconnect()
         return lista
@@ -45,7 +47,7 @@ class Db:
         CREATE TABLE {table_name} {str(table_columns).replace("'", "")};""")
         self.disconnect()
     
-    #New, edit e del
+    #Cria nova instância de uma tabela. 
     def new_instance(self, table:str, tupla:tuple):
         conn = self.connect()
         cursor = conn.cursor()
@@ -56,24 +58,23 @@ class Db:
         conn.commit()
         self.disconnect()
     
+    #Edita instância de uma tabela. (key -> [atributo, valor])
     def edit_instance(self, table:str, key:list, attribute:str, value):
         conn = self.connect()
         cursor = conn.cursor()
-        cursor.execute(f"""
-                            UPDATE {table}
-                            SET {attribute} = '{value}'
-                            WHERE {key[0]} = '{key[1]}'
-                            """, ())
+        cursor.execute(f"""UPDATE {table} SET {attribute} = '{value}' WHERE {key[0]} = '{key[1]}'""", ())
         conn.commit()
     
+    #Remove instância de uma tabela. (key -> [atributo, valor])
     def del_instance(self, table:str, key:list):
         conn = self.connect()
         cursor = conn.cursor()
         key =  f"WHERE {key[0]} = '{key[1]}'"
-        cursor.execute(f"""
-                        DELETE FROM {table} {key}
-                        """,)
+        cursor.execute(f"""DELETE FROM {table} {key}""",)
         conn.commit()
+
+def main():
+    pass
     
 if __name__ == '__main__':
-    pass
+    main()

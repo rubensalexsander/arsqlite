@@ -31,7 +31,7 @@ class DbSqlite:
         cursor.execute(f"""PRAGMA table_info({table});""")
         lista = cursor.fetchall()
         self.disconnect()
-        return (i[1] for i in lista)
+        return [i[1] for i in lista]
     
     #Retorna instância de uma tabela. (key -> [atributo, valor])
     def get_instance(self, table:str, key:list, columns:tuple='*'):
@@ -41,11 +41,36 @@ class DbSqlite:
         self.disconnect()
         return lista
     
-    def new_table(self, table_name:str, table_columns:tuple):
+    #Edição de tabelas---------------------------------------------------------
+    def new_table(self, name:str, columns:tuple):
         cursor = self.connect().cursor()
         cursor.execute(f"""
-        CREATE TABLE {table_name} {str(table_columns).replace("'", "")};""")
+        CREATE TABLE {name} {str(columns).replace("'", "")};""")
         self.disconnect()
+    
+    def __add_table_column(self, table_name:str, column_name:str, column_type:str='TEXT'):
+        cursor = self.connect().cursor()
+        cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}")
+    
+    def __del_table_column(self, table_name:str, column_name:str):
+        cursor = self.connect().cursor()
+        cursor.execute(f"ALTER TABLE {table_name} DROP COLUMN {column_name}")
+    
+    def edit_table_columns(self, name:str, columns:tuple):
+        table_actual_columns = self.get_table_columns(name)
+        add_columns = []
+        del_columns = []
+        for i in table_actual_columns:
+            if not i in columns: del_columns.append(i)
+        for i in columns:
+            if not i in table_actual_columns: add_columns.append(i)
+        for i in add_columns: self.__add_table_column(name, i)
+        for i in del_columns: self.__del_table_column(name, i)
+
+    def del_table(self, name:str):
+        cursor = self.connect().cursor()
+        cursor.execute(f"DROP TABLE IF EXISTS {name}")
+    #--------------------------------------------------------------------------
     
     #Cria nova instância de uma tabela. 
     def new_instance(self, table:str, tupla:tuple):
@@ -74,7 +99,9 @@ class DbSqlite:
         conn.commit()
 
 def main():
-    pass
+    db = DbSqlite('db_test.db')
+    columns = ('id', 'idade', 'teste', 'column0003')
+    #db.edit_table_columns('table02', columns)
     
 if __name__ == '__main__':
     main()

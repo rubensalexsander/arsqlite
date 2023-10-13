@@ -1,4 +1,5 @@
 from sqlite3 import connect
+from random import randint
 
 class DbSqlite:
     def __init__(self, local:str=None):
@@ -10,6 +11,14 @@ class DbSqlite:
     
     def disconnect(self):
         self.conn.close()
+    
+    def get_unprecedented_id(self, table, id_surname="id", range=[100000, 999999]):
+        all_ids = [i[0] for i in self.get_table(tabela=table, columns=[id_surname])]
+        while True:
+            new_id = randint(range[0], range[1])
+            if new_id in all_ids: pass
+            else: break
+        return new_id
     
     def get_tables(self):
         cursor = self.connect().cursor()
@@ -143,14 +152,9 @@ class DbSqlite:
         conn.commit()
 
 def main():
-    db = DbSqlite('db.db')
-    table_name = 'dados_individuo'
-
-    db.reorder_column(table_name, 'nome', 1)
-
-    print(db.get_table_columns(table_name))
-    for i in db.get_table(table_name):
-        print(i)
+    db = DbSqlite('db_test.db')
+    columns = ('id', 'idade', 'teste', 'column0003')
+    #db.edit_table_columns('table02', columns)
     
 if __name__ == '__main__':
     main()
